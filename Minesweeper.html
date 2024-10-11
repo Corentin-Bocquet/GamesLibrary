@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #minesweeper {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-gap: 5px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #888;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="minesweeper"></div>
+
+    <script>
+        const grid = [];
+        const gridSize = 10;
+        const mineCount = 10; // Reduced number of mines
+        const minefield = document.getElementById("minesweeper");
+
+        function createCell() {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            return cell;
+        }
+
+        function placeMines() {
+            let placedMines = 0;
+            while (placedMines < mineCount) {
+                const randomRow = Math.floor(Math.random() * gridSize);
+                const randomCol = Math.floor(Math.random() * gridSize);
+                if (!grid[randomRow][randomCol].mine) {
+                    grid[randomRow][randomCol].mine = true;
+                    placedMines++;
+                }
+            }
+        }
+
+        function setupGrid() {
+            for (let i = 0; i < gridSize; i++) {
+                const row = [];
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = createCell();
+                    const cellData = { mine: false, revealed: false, element: cell };
+                    row.push(cellData);
+                    minefield.appendChild(cell);
+
+                    cell.addEventListener("click", () => {
+                        if (cellData.mine) {
+                            cell.textContent = "💣";
+                            alert("Game Over");
+                        } else {
+                            cell.textContent = " ";
+                            cell.style.backgroundColor = "#ddd";
+                            cellData.revealed = true;
+                        }
+                    });
+                }
+                grid.push(row);
+            }
+            placeMines();
+        }
+
+        setupGrid();
+    </script>
+</body>
+</html>

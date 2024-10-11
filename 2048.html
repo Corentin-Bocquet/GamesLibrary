@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #faf8ef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-board {
+            width: 500px;
+            height: 500px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            background-color: #bbada0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #cdc1b4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px;
+        }
+        .tile[data-value="2"] {
+            background-color: #eee4da;
+            color: #776e65;
+        }
+        .tile[data-value="4"] {
+            background-color: #ede0c8;
+            color: #776e65;
+        }
+        .tile[data-value="8"] {
+            background-color: #f2b179;
+        }
+        .tile[data-value="16"] {
+            background-color: #f59563;
+        }
+        .tile[data-value="32"] {
+            background-color: #f67c5f;
+        }
+        .tile[data-value="64"] {
+            background-color: #f65e3b;
+        }
+        .tile[data-value="128"] {
+            background-color: #edcf72;
+        }
+        .tile[data-value="256"] {
+            background-color: #edcc61;
+        }
+        .tile[data-value="512"] {
+            background-color: #edc850;
+        }
+        .tile[data-value="1024"] {
+            background-color: #edc53f;
+        }
+        .tile[data-value="2048"] {
+            background-color: #edc22e;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-board"></div>
+
+    <script>
+        const board = document.getElementById("game-board");
+        const gridSize = 4;
+        const tiles = [];
+
+        function createTile(value = 0) {
+            const tile = document.createElement("div");
+            tile.classList.add("tile");
+            tile.dataset.value = value;
+            if (value) tile.textContent = value;
+            return tile;
+        }
+
+        function initBoard() {
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = createTile();
+                tiles.push(tile);
+                board.appendChild(tile);
+            }
+            addRandomTile();
+            addRandomTile();
+        }
+
+        function addRandomTile() {
+            const emptyTiles = tiles.filter(tile => tile.dataset.value == 0);
+            if (emptyTiles.length > 0) {
+                const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+                randomTile.dataset.value = 2;
+                randomTile.textContent = 2;
+            }
+        }
+
+        function move(direction) {
+            // Logic to move tiles based on direction and merge tiles
+            // Here, implement the movement and merging of tiles
+            addRandomTile(); // Add a new random tile after every move
+        }
+
+        document.addEventListener("keydown", (e) => {
+            switch (e.key) {
+                case "ArrowUp":
+                    move("up");
+                    break;
+                case "ArrowDown":
+                    move("down");
+                    break;
+                case "ArrowLeft":
+                    move("left");
+                    break;
+                case "ArrowRight":
+                    move("right");
+                    break;
+            }
+        });
+
+        initBoard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 300px;
+            margin: 50px auto;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 2px solid #007bff;
+            font-size: 2rem;
+            text-align: center;
+            line-height: 100px;
+            cursor: pointer;
+        }
+        .cell:hover {
+            background-color: #e7f1ff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tic Tac Toe Board -->
+    <div class="board" id="board"></div>
+
+    <!-- JavaScript for Tic Tac Toe Logic -->
+    <script>
+        const board = document.getElementById('board');
+        let cells = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+
+        function renderBoard() {
+            board.innerHTML = '';
+            cells.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.classList.add('cell');
+                cellDiv.textContent = cell;
+                cellDiv.addEventListener('click', () => makeMove(index));
+                board.appendChild(cellDiv);
+            });
+        }
+
+        function makeMove(index) {
+            if (cells[index] === '') {
+                cells[index] = currentPlayer;
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                renderBoard();
+                checkWinner();
+            }
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]              // Diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+                    alert(`${cells[a]} Wins!`);
+                    resetGame();
+                }
+            }
+        }
+
+        function resetGame() {
+            cells = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            renderBoard();
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>

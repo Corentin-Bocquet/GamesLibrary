@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        table {
+            margin: 50px auto;
+            border-collapse: collapse;
+        }
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #007bff;
+            text-align: center;
+            font-size: 24px;
+        }
+        input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 24px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sudoku Grid -->
+    <table id="sudokuGrid"></table>
+
+    <!-- JavaScript for Sudoku Logic -->
+    <script>
+        const grid = document.getElementById('sudokuGrid');
+        const board = [
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        ];
+
+        function drawGrid() {
+            for (let r = 0; r < 9; r++) {
+                const row = document.createElement('tr');
+                for (let c = 0; c < 9; c++) {
+                    const cell = document.createElement('td');
+                    if (board[r][c] !== 0) {
+                        cell.textContent = board[r][c];
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        input.addEventListener('input', validateInput);
+                        cell.appendChild(input);
+                    }
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+        }
+
+        function validateInput(e) {
+            const value = e.target.value;
+            const row = e.target.dataset.row;
+            const col = e.target.dataset.col;
+            if (value && (isNaN(value) || value < 1 || value > 9)) {
+                e.target.value = '';
+            }
+        }
+
+        drawGrid();
+    </script>
+
+</body>
+</html>
