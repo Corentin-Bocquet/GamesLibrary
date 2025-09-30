@@ -1,94 +1,758 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Custom CSS -->
+    <title>Tic Tac Toe Deluxe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --glow-color: rgba(255, 255, 255, 0.6);
+            --x-color: #ff6b6b;
+            --o-color: #4dabf7;
         }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #f8f9fa;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 143, 178, 0.4), transparent 50%),
+                        radial-gradient(circle at 80% 10%, rgba(80, 201, 255, 0.35), transparent 55%),
+                        radial-gradient(circle at 50% 80%, rgba(123, 237, 159, 0.45), transparent 45%),
+                        #0d1b2a;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        body.theme-zen {
+            background: radial-gradient(circle at 10% 20%, rgba(56, 142, 60, 0.55), transparent 60%),
+                        radial-gradient(circle at 90% 15%, rgba(102, 187, 106, 0.45), transparent 55%),
+                        linear-gradient(135deg, #001c1d, #013a40 65%, #025159);
+        }
+
+        body.theme-cosmic {
+            background: radial-gradient(circle at 15% 30%, rgba(137, 45, 221, 0.45), transparent 60%),
+                        radial-gradient(circle at 85% 20%, rgba(16, 78, 226, 0.45), transparent 50%),
+                        radial-gradient(circle at 50% 80%, rgba(255, 198, 0, 0.35), transparent 50%),
+                        #040221;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Comfortaa', cursive;
+            letter-spacing: 1px;
+        }
+
+        .hero-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .glass-card {
+            position: relative;
+            border-radius: 24px;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(18px) saturate(140%);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .status-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border-radius: 18px;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-text {
+            font-size: 1.1rem;
+        }
+
+        .board-wrapper {
+            perspective: 1400px;
+            margin: 2rem auto 1.5rem;
+            max-width: 360px;
+        }
+
         .board {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-gap: 10px;
-            width: 300px;
-            margin: 50px auto;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            padding: 18px;
+            border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
+            box-shadow: inset 0 10px 20px rgba(255, 255, 255, 0.18), inset 0 -12px 24px rgba(0, 0, 0, 0.35);
+            transform: rotateX(18deg) rotateZ(-2deg);
+            transition: transform 0.6s ease;
         }
+
+        .board.waiting {
+            transform: rotateX(22deg) rotateZ(-4deg) scale(0.99);
+        }
+
         .cell {
-            width: 100px;
-            height: 100px;
-            background-color: #fff;
-            border: 2px solid #007bff;
-            font-size: 2rem;
-            text-align: center;
-            line-height: 100px;
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(8, 28, 51, 0.9), rgba(22, 43, 74, 0.88));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 14px 24px rgba(4, 9, 22, 0.65);
             cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            overflow: hidden;
         }
+
+        .cell::after {
+            content: '';
+            position: absolute;
+            inset: 8%;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .cell:hover::after {
+            opacity: 1;
+        }
+
         .cell:hover {
-            background-color: #e7f1ff;
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 18px 36px rgba(4, 9, 22, 0.75);
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .cell span {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            font-size: clamp(2.4rem, 7vw, 3.6rem);
+            font-weight: 700;
+            text-shadow: 0 8px 18px rgba(0, 0, 0, 0.65);
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .cell.filled span {
+            transform: translateZ(18px) scale(1.03);
+        }
+
+        .cell[data-value="X"] span {
+            color: var(--x-color);
+        }
+
+        .cell[data-value="O"] span {
+            color: var(--o-color);
+        }
+
+        .cell.highlight {
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 20px 45px rgba(255, 255, 255, 0.25);
+        }
+
+        .cell.last-move::after {
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.45);
+            opacity: 1;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .btn-soft {
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            padding: 0.75rem 1.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-soft:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.35);
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .scoreboard {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .score-tile {
+            border-radius: 20px;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #f1f3f5;
+        }
+
+        .score-tile span:first-child {
+            font-size: 1.1rem;
+        }
+
+        .settings-group {
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .form-select, .form-check-input {
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .form-select:focus, .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+        }
+
+        .legend {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 991px) {
+            .board {
+                transform: rotateX(10deg) rotateZ(0);
+            }
+        }
+
+        @media (max-width: 575px) {
+            .glass-card {
+                padding: 1.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
-<body>
+<body class="theme-cosmic">
+    <div class="container py-5">
+        <header class="hero-title text-white">
+            <p class="text-uppercase mb-2 fw-semibold" style="letter-spacing: 0.35rem;">Ultimate Experience</p>
+            <h1 class="display-4 fw-bold mb-3">Tic Tac Toe Deluxe</h1>
+            <p class="lead text-opacity-75 mx-auto" style="max-width: 720px;">
+                Défiez vos amis ou affrontez une IA redoutable dans cette version premium du Tic Tac Toe.
+                Choisissez votre ambiance, vos règles, enchaînez les victoires et laissez-vous surprendre par cette
+                version 3D élégante et intelligente du grand classique.
+            </p>
+        </header>
 
-    <!-- Tic Tac Toe Board -->
-    <div class="board" id="board"></div>
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-6">
+                <section class="glass-card h-100 d-flex flex-column">
+                    <div class="status-banner mb-4">
+                        <div>
+                            <h2 class="h5 text-uppercase mb-1">Statut de la partie</h2>
+                            <p class="status-text mb-0" data-status>À vous de jouer !</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2" data-mode-label>Mode IA (Parfait)</span>
+                        </div>
+                    </div>
 
-    <!-- JavaScript for Tic Tac Toe Logic -->
+                    <div class="board-wrapper">
+                        <div class="board" data-board aria-label="Plateau de Tic Tac Toe"></div>
+                    </div>
+
+                    <div class="controls mt-auto">
+                        <button type="button" class="btn-soft" data-new-match>Nouvelle manche</button>
+                        <button type="button" class="btn-soft" data-reset-score>Réinitialiser les scores</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-lg-6">
+                <section class="glass-card h-100 d-flex flex-column">
+                    <div class="mb-4">
+                        <h2 class="h4 mb-3">Tableau des scores</h2>
+                        <div class="scoreboard" role="status" aria-live="polite">
+                            <div class="score-tile">
+                                <span>Victoires X</span>
+                                <span data-score-x>0</span>
+                            </div>
+                            <div class="score-tile">
+                                <span>Victoires O</span>
+                                <span data-score-o>0</span>
+                            </div>
+                            <div class="score-tile">
+                                <span>Matchs nuls</span>
+                                <span data-score-ties>0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Paramètres de partie</h3>
+                        <div class="settings-group mb-3">
+                            <label class="form-label text-uppercase small">Mode de jeu</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="mode-ai" value="ai" checked>
+                                <label class="form-check-label" for="mode-ai">Contre l'IA</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="mode-duo" value="duo">
+                                <label class="form-check-label" for="mode-duo">Duel local (2 joueurs)</label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group mb-3" data-ai-settings>
+                            <label for="difficulty" class="form-label text-uppercase small">Difficulté de l'IA</label>
+                            <select id="difficulty" class="form-select">
+                                <option value="easy">Relax</option>
+                                <option value="medium">Stratégique</option>
+                                <option value="hard" selected>Parfaite</option>
+                            </select>
+                            <p class="legend mb-0 mt-2">
+                                Relax : coups aléatoires &bull; Stratégique : bloque ou gagne &bull; Parfaite : IA imbattable basée sur Minimax.
+                            </p>
+                        </div>
+
+                        <div class="settings-group mb-3" data-ai-settings>
+                            <label for="player-mark" class="form-label text-uppercase small">Votre symbole</label>
+                            <select id="player-mark" class="form-select">
+                                <option value="X" selected>Je commence (X)</option>
+                                <option value="O">Je laisse l'IA commencer (O)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group mb-3">
+                            <label for="theme-select" class="form-label text-uppercase small">Ambiance visuelle</label>
+                            <select id="theme-select" class="form-select">
+                                <option value="cosmic" selected>Cosmic Glow</option>
+                                <option value="zen">Zen Garden</option>
+                                <option value="default">Aurora Dream</option>
+                            </select>
+                            <p class="legend mb-0 mt-2">Changez l'atmosphère pour adapter l'expérience à votre humeur.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <h3 class="h5 mb-3">Astuces &amp; fonctionnalités</h3>
+                        <ul class="instructions ps-3">
+                            <li>Survolez les cases pour ressentir l'effet 3D et repérez votre dernier coup grâce au halo lumineux.</li>
+                            <li>L'IA parfaite utilise Minimax : impossible de la vaincre, mais vous pouvez obtenir un match nul.</li>
+                            <li>Les scores sont mémorisés sur votre navigateur pour suivre vos progrès.</li>
+                            <li>Envie d'un duel ? Activez le mode 2 joueurs pour une bataille locale instantanée.</li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const board = document.getElementById('board');
-        let cells = ['', '', '', '', '', '', '', '', ''];
+        const boardElement = document.querySelector('[data-board]');
+        const statusElement = document.querySelector('[data-status]');
+        const modeLabel = document.querySelector('[data-mode-label]');
+        const newMatchButton = document.querySelector('[data-new-match]');
+        const resetScoreButton = document.querySelector('[data-reset-score]');
+        const scoreXElement = document.querySelector('[data-score-x]');
+        const scoreOElement = document.querySelector('[data-score-o]');
+        const scoreTiesElement = document.querySelector('[data-score-ties]');
+        const modeInputs = document.querySelectorAll('input[name="mode"]');
+        const aiSettingsBlocks = document.querySelectorAll('[data-ai-settings]');
+        const difficultySelect = document.getElementById('difficulty');
+        const playerMarkSelect = document.getElementById('player-mark');
+        const themeSelect = document.getElementById('theme-select');
+
+        const winningPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        const SCORE_STORAGE_KEY = 'ticTacToeDeluxeScores';
+
+        let cells = Array(9).fill('');
         let currentPlayer = 'X';
+        let isGameActive = true;
+        let winningCombo = [];
+        let lastMoveIndex = null;
+        let settings = {
+            mode: 'ai',
+            difficulty: 'hard',
+            humanMark: 'X',
+            theme: 'cosmic'
+        };
+
+        let scoreboard = loadScoreboard();
+        updateScoreboardUI();
+
+        renderBoard();
+        updateStatus();
+        maybeTriggerAiStart();
+
+        newMatchButton.addEventListener('click', () => {
+            resetBoard();
+            maybeTriggerAiStart();
+        });
+
+        resetScoreButton.addEventListener('click', () => {
+            scoreboard = { X: 0, O: 0, ties: 0 };
+            saveScoreboard();
+            updateScoreboardUI();
+        });
+
+        modeInputs.forEach((input) => {
+            input.addEventListener('change', (event) => {
+                settings.mode = event.target.value;
+                const isAiMode = settings.mode === 'ai';
+                aiSettingsBlocks.forEach((block) => block.classList.toggle('d-none', !isAiMode));
+                modeLabel.textContent = isAiMode ? `Mode IA (${difficultyLabel(settings.difficulty)})` : 'Mode 2 Joueurs';
+                resetBoard();
+                updateStatus();
+                maybeTriggerAiStart();
+            });
+        });
+
+        difficultySelect.addEventListener('change', (event) => {
+            settings.difficulty = event.target.value;
+            modeLabel.textContent = `Mode IA (${difficultyLabel(settings.difficulty)})`;
+            resetBoard();
+            updateStatus();
+            maybeTriggerAiStart();
+        });
+
+        playerMarkSelect.addEventListener('change', (event) => {
+            settings.humanMark = event.target.value;
+            resetBoard();
+            updateStatus();
+            maybeTriggerAiStart();
+        });
+
+        themeSelect.addEventListener('change', (event) => {
+            const value = event.target.value;
+            document.body.classList.remove('theme-cosmic', 'theme-zen');
+            if (value === 'cosmic') {
+                document.body.classList.add('theme-cosmic');
+            } else if (value === 'zen') {
+                document.body.classList.add('theme-zen');
+            }
+            settings.theme = value;
+        });
 
         function renderBoard() {
-            board.innerHTML = '';
-            cells.forEach((cell, index) => {
-                const cellDiv = document.createElement('div');
-                cellDiv.classList.add('cell');
-                cellDiv.textContent = cell;
-                cellDiv.addEventListener('click', () => makeMove(index));
-                board.appendChild(cellDiv);
+            boardElement.innerHTML = '';
+            boardElement.classList.toggle('waiting', !isGameActive && settings.mode === 'ai' && currentPlayer !== settings.humanMark);
+
+            cells.forEach((value, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'cell';
+                button.dataset.index = index;
+                button.setAttribute('aria-label', value ? `Case ${index + 1}, ${value}` : `Case ${index + 1}, vide`);
+
+                if (value) {
+                    button.classList.add('filled');
+                    button.dataset.value = value;
+                }
+
+                if (!isGameActive || value) {
+                    button.classList.add('disabled');
+                }
+
+                if (winningCombo.includes(index)) {
+                    button.classList.add('highlight');
+                }
+
+                if (index === lastMoveIndex) {
+                    button.classList.add('last-move');
+                }
+
+                const span = document.createElement('span');
+                span.innerHTML = value || '&nbsp;';
+                button.append(span);
+
+                button.addEventListener('click', () => handleCellClick(index));
+                boardElement.append(button);
             });
         }
 
-        function makeMove(index) {
-            if (cells[index] === '') {
-                cells[index] = currentPlayer;
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                renderBoard();
-                checkWinner();
+        function handleCellClick(index) {
+            if (!isGameActive || cells[index]) {
+                return;
+            }
+
+            const isHumanTurn = settings.mode === 'duo' || currentPlayer === settings.humanMark;
+            if (settings.mode === 'ai' && !isHumanTurn) {
+                return;
+            }
+
+            playMove(index);
+
+            if (settings.mode === 'ai' && isGameActive) {
+                boardElement.classList.add('waiting');
+                setTimeout(() => {
+                    const aiMove = chooseAiMove();
+                    boardElement.classList.remove('waiting');
+                    if (aiMove !== null) {
+                        playMove(aiMove);
+                    }
+                }, 450);
             }
         }
 
-        function checkWinner() {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6]              // Diagonals
-            ];
+        function playMove(index) {
+            if (!isGameActive || cells[index]) {
+                return;
+            }
 
-            for (const pattern of winPatterns) {
+            cells[index] = currentPlayer;
+            lastMoveIndex = index;
+            renderBoard();
+
+            const result = evaluateBoard(cells);
+            if (result) {
+                handleEndGame(result);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateStatus();
+            }
+        }
+
+        function evaluateBoard(boardState) {
+            for (const pattern of winningPatterns) {
                 const [a, b, c] = pattern;
-                if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
-                    alert(`${cells[a]} Wins!`);
-                    resetGame();
+                if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                    return { winner: boardState[a], combo: pattern };
                 }
             }
+
+            if (boardState.every((cell) => cell)) {
+                return { winner: null, combo: [] };
+            }
+
+            return null;
         }
 
-        function resetGame() {
-            cells = ['', '', '', '', '', '', '', '', ''];
-            currentPlayer = 'X';
+        function handleEndGame(result) {
+            isGameActive = false;
+            winningCombo = result.combo || [];
             renderBoard();
+
+            if (result.winner) {
+                statusElement.textContent = `${result.winner} remporte la manche !`;
+                scoreboard[result.winner] += 1;
+            } else {
+                statusElement.textContent = 'Match nul, quelle tension !';
+                scoreboard.ties += 1;
+            }
+
+            saveScoreboard();
+            updateScoreboardUI();
         }
 
-        renderBoard();
+        function updateStatus() {
+            if (!isGameActive) {
+                return;
+            }
+
+            if (settings.mode === 'ai') {
+                const isHumanTurn = currentPlayer === settings.humanMark;
+                if (isHumanTurn) {
+                    statusElement.textContent = `À vous de jouer (${currentPlayer}) !`;
+                } else {
+                    statusElement.textContent = `L'IA réfléchit... (${currentPlayer})`;
+                }
+            } else {
+                statusElement.textContent = `Tour du joueur ${currentPlayer}`;
+            }
+        }
+
+        function resetBoard() {
+            cells = Array(9).fill('');
+            winningCombo = [];
+            isGameActive = true;
+            lastMoveIndex = null;
+            currentPlayer = 'X';
+
+            if (settings.mode === 'ai' && settings.humanMark === 'O') {
+                currentPlayer = 'O';
+            }
+
+            renderBoard();
+            updateStatus();
+        }
+
+        function maybeTriggerAiStart() {
+            if (settings.mode === 'ai' && settings.humanMark === 'O') {
+                boardElement.classList.add('waiting');
+                setTimeout(() => {
+                    const aiMove = chooseAiMove();
+                    boardElement.classList.remove('waiting');
+                    if (aiMove !== null) {
+                        playMove(aiMove);
+                    }
+                }, 450);
+            }
+        }
+
+        function chooseAiMove() {
+            const aiMark = settings.humanMark === 'X' ? 'O' : 'X';
+            const emptyIndices = cells
+                .map((value, index) => (value ? null : index))
+                .filter((index) => index !== null);
+
+            if (!emptyIndices.length) {
+                return null;
+            }
+
+            if (settings.difficulty === 'easy') {
+                return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            }
+
+            if (settings.difficulty === 'medium') {
+                const winningMove = findStrategicMove(aiMark);
+                if (winningMove !== null) {
+                    return winningMove;
+                }
+                const blockingMove = findStrategicMove(settings.humanMark);
+                if (blockingMove !== null) {
+                    return blockingMove;
+                }
+                return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            }
+
+            return minimaxBestMove(cells, aiMark).index;
+        }
+
+        function findStrategicMove(playerMark) {
+            for (const pattern of winningPatterns) {
+                const values = pattern.map((index) => cells[index]);
+                const markCount = values.filter((value) => value === playerMark).length;
+                const emptyCount = values.filter((value) => !value).length;
+                if (markCount === 2 && emptyCount === 1) {
+                    return pattern[values.indexOf('')];
+                }
+            }
+            return null;
+        }
+
+        function minimaxBestMove(boardState, aiMark) {
+            const humanMark = settings.humanMark;
+
+            function minimax(board, player) {
+                const evaluation = evaluateBoard(board);
+                if (evaluation) {
+                    if (evaluation.winner === aiMark) return { score: 10 };
+                    if (evaluation.winner === humanMark) return { score: -10 };
+                    return { score: 0 };
+                }
+
+                const moves = [];
+                board.forEach((cell, index) => {
+                    if (!cell) {
+                        board[index] = player;
+                        const result = minimax(board, player === aiMark ? humanMark : aiMark);
+                        moves.push({ index, score: result.score });
+                        board[index] = '';
+                    }
+                });
+
+                let bestMove;
+                if (player === aiMark) {
+                    let bestScore = -Infinity;
+                    for (const move of moves) {
+                        if (move.score > bestScore) {
+                            bestScore = move.score;
+                            bestMove = move;
+                        }
+                    }
+                } else {
+                    let bestScore = Infinity;
+                    for (const move of moves) {
+                        if (move.score < bestScore) {
+                            bestScore = move.score;
+                            bestMove = move;
+                        }
+                    }
+                }
+
+                return bestMove || moves[0];
+            }
+
+            return minimax([...boardState], aiMark);
+        }
+
+        function difficultyLabel(difficulty) {
+            switch (difficulty) {
+                case 'easy':
+                    return 'Relax';
+                case 'medium':
+                    return 'Stratégique';
+                default:
+                    return 'Parfaite';
+            }
+        }
+
+        function loadScoreboard() {
+            try {
+                const stored = localStorage.getItem(SCORE_STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && typeof parsed === 'object') {
+                        return { X: parsed.X ?? 0, O: parsed.O ?? 0, ties: parsed.ties ?? 0 };
+                    }
+                }
+            } catch (error) {
+                console.warn('Impossible de récupérer les scores :', error);
+            }
+            return { X: 0, O: 0, ties: 0 };
+        }
+
+        function saveScoreboard() {
+            try {
+                localStorage.setItem(SCORE_STORAGE_KEY, JSON.stringify(scoreboard));
+            } catch (error) {
+                console.warn('Impossible de sauvegarder les scores :', error);
+            }
+        }
+
+        function updateScoreboardUI() {
+            scoreXElement.textContent = scoreboard.X;
+            scoreOElement.textContent = scoreboard.O;
+            scoreTiesElement.textContent = scoreboard.ties;
+        }
     </script>
 </body>
 </html>
